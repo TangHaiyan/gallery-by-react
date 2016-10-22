@@ -53,11 +53,12 @@ class ImgFigure extends React.Component {
     }
 
     //如果图片的旋转角度有值并且不为0，添加旋转角度
-    if (this.props.arrange.rotate) {
-      (['Moz', 'Ms', 'Webkit', '']).forEach((value) => {
-        styleObj[value + 'Transform'] = 'rotate(' + this.props.arrange.rotate + 'deg)';
+  if (this.props.arrange.rotate) {
+      (['MozTransform', 'msTransform', 'WebkitTransform', 'transform']).forEach((value) => {
+        styleObj[value ] = 'rotate(' + this.props.arrange.rotate + 'deg)';
       })
-    }
+    }    
+
     if (this.props.arrange.isCenter) {
       styleObj.zIndex = 11;
     }
@@ -79,7 +80,38 @@ class ImgFigure extends React.Component {
     );
   }
 }
+class ControllerUnit extends React.Component{
+  constructor(props) {
+    super(props);
+    this.handleClick = this.handleClick.bind(this);
+  }
 
+  handleClick(e){
+   if (this.props.arrange.isCenter) {
+        this.props.inverse();
+    }else{
+       this.props.center(); 
+    }
+    
+    e.stopPropagation();
+    e.preventDefault();
+  }
+
+  render(){
+    let controllerUnitClassName = 'controller-unit';
+    //如果对应的是居中的图片，显示控制按钮的居中态
+    if (this.props.arrange.isCenter) {
+      controllerUnitClassName += ' is-center ';
+      //如果翻转显示翻转状态
+      if (this.props.arrange.isInverse) {
+        controllerUnitClassName += 'is-inverse';
+      }
+    }
+    return(
+      <span className={controllerUnitClassName} onClick={this.handleClick}></span>)
+  }
+
+}
 class GalleryByReactApp extends React.Component {
   constructor(props) {
     super(props);
@@ -134,7 +166,7 @@ class GalleryByReactApp extends React.Component {
      *重新布局所有图片
      *@param centerIndex 指定居中排布哪个图片
      */
-  //重新布局所有图片
+
   rearrange(centerIndex) {
     let imgsArrangeArr = this.state.imgsArrangeArr,
       Constant = this.Constant,
@@ -250,8 +282,8 @@ class GalleryByReactApp extends React.Component {
       this.Constant.vPosRange.x[0] = halfStageW - imgW;
       this.Constant.vPosRange.x[1] = halfStageW;
 
-      let num = Math.floor(Math.random() * 10);
-      this.rearrange(num);
+      
+      this.rearrange(0);
     }
 
 
@@ -312,9 +344,9 @@ class GalleryByReactApp extends React.Component {
           isCenter: false
         }
       }
-      imgFigures.push(<ImgFigure data={value} key={index} ref={'imgFigure'+index}  
-                                 arrange={this.state.imgsArrangeArr[index]} inverse={this.inverse(index)} center={this.center(index)}/>);
+      imgFigures.push(<ImgFigure data={value} key={index} ref={'imgFigure'+index} arrange={this.state.imgsArrangeArr[index]} inverse={this.inverse(index)} center={this.center(index)}/>);
 
+      controllerUnits.push(<ControllerUnit data={value} key={index} arrange={this.state.imgsArrangeArr[index]} inverse={this.inverse(index)} center={this.center(index)}/>)
     });
     return (
       <section className="stage" ref="stage">
@@ -322,7 +354,7 @@ class GalleryByReactApp extends React.Component {
           {imgFigures}
         </section>
         <nav className="controller-nav">
-         
+         {controllerUnits}
         </nav>
       </section>
     );
